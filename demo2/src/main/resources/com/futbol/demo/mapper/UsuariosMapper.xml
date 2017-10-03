@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.futbol.demo.mapper.UsuariosMapper">
+
+    <select id="findAll" resultType="Usuarios">
+		select * from usuarios;
+    </select>
+	
+	<insert id="insert" parameterType="Usuarios" useGeneratedKeys="true"> 
+  		insert into usuarios (strnombre, strapellido1) values (#{strnombre}, #{strapellido1})
+	</insert>
+	
+	<delete id="delete" parameterType="Usuarios">
+		
+  		delete from usuarios where firstName = #{strnombre}
+	</delete>
+	
+</mapper>
