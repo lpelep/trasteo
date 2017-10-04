@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.futbol.demo.core.user.UserRepository;
@@ -20,8 +21,8 @@ public class UsuarioPeticiones {
 		this.userRepository = userRepository;
 	}
 	
-	@GetMapping("/all")
-	public List<Usuarios> getAll(){
+	@RequestMapping("/all")
+	public @ResponseBody List<Usuarios> getAll(){
 		return userRepository.findAllData();
 	}
 	
