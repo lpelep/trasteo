@@ -15,4 +15,11 @@
   		delete from usuarios where firstName = #{strnombre}
 	</delete>
 	
+	<select id="findUser" resultType="Usuarios">
+		select * from usuarios where strlogin = #{strlogin}
+    </select>
+	
+	<select id="findById" resultType="Usuarios">
+		select * from usuarios where idusuario = #{id}
+    </select>
 </mapper>

@@ -17,4 +17,7 @@ public interface UserRepository {
 
     List<Usuarios> delete(Usuarios user);
 
+    Usuarios findUser(Usuarios user);
+    
+    Usuarios findById (int id);
 }

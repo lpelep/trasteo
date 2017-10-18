@@ -44,4 +44,19 @@ public class UserRepositoryImpl implements UserRepository {
 		return userMapper.findAll();
 	}
 
+
+	@Override
+	public Usuarios findUser(Usuarios user) {
+		//Usuarios localizado = userMapper.findUser(user.getStrlogin(), user.getStrpassword());
+		Usuarios localizado = userMapper.findUser(user);
+		return localizado;
+		
+	}
+	
+	@Override
+	public Usuarios findById (int id) {
+		Usuarios localizado = userMapper.findById(id);
+		return localizado;
+	}
+
 }

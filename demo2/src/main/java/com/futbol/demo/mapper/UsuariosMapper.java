@@ -3,6 +3,7 @@ package com.futbol.demo.mapper;
 import java.util.List;
 
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Component;
 
 import com.futbol.demo.modelo.Usuarios;
@@ -16,4 +17,8 @@ public interface UsuariosMapper {
 	void insert(Usuarios usuario);
 
 	void delete(Usuarios usuario);
+	
+	Usuarios findUser(Usuarios usuario);
+
+	Usuarios findById(int id);
 }

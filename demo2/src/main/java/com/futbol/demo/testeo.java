@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 public class testeo {
+	@SuppressWarnings("unused")
 	public static void main(String[] argv) {
 
 		System.out.println("-------- PostgreSQL "

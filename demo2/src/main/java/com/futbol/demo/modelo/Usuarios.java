@@ -11,7 +11,4 @@ public @Data class Usuarios {
 	private String strlogin;
 	private String strpassword;
 	private String email;
-//	private String strnombre;
-//	private String strapellido;
-//	private String strapellido2;
 }
