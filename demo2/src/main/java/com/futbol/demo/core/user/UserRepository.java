@@ -15,7 +15,7 @@ public interface UserRepository {
 
     List<Usuarios> insert(Usuarios user);
 
-    List<Usuarios> delete(Usuarios user);
+    void delete(Usuarios user);
 
     Usuarios findUser(Usuarios user);
     

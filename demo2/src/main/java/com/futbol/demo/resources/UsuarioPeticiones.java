@@ -2,22 +2,28 @@ package com.futbol.demo.resources;
 
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.futbol.demo.core.rol.RolRepository;
 import com.futbol.demo.core.user.UserRepository;
+import com.futbol.demo.modelo.JWTUsuario;
 import com.futbol.demo.modelo.Usuarios;
 import com.futbol.demo.service.JwtAuthenticationResponse;
 import com.futbol.demo.service.JwtService;
 
+import static org.springframework.web.bind.annotation.RequestMethod.*;
 
 @RestController
 @RequestMapping("/rest/usuarios")
@@ -27,49 +33,105 @@ public class UsuarioPeticiones {
 	private UserRepository userRepository;
 	
 	@Autowired
+	private RolRepository rolRepository;
+	
+	@Autowired
 	private JwtService jwtService;
 	
-	public UsuarioPeticiones(UserRepository userRepository) {
+	@Value("${jwt.header}")
+	private String header;
+	
+	public UsuarioPeticiones(UserRepository userRepository, RolRepository rolRepository) {
 		this.userRepository = userRepository;
+		this.rolRepository = rolRepository;
 	}
 	
-	@RequestMapping("/all")
+	@RequestMapping(path = "/all", method = GET)
 	public @ResponseBody List<Usuarios> getAll(){
 		return userRepository.findAllData();
 	}
 	
-	 @RequestMapping(path = "login/", method = RequestMethod.POST)
-	    public ResponseEntity<?> userLogin(@RequestBody Usuarios usuarios, BindingResult bindingResult) {
+	 @RequestMapping(path = "login/", method = POST)
+	 public ResponseEntity<?> userLogin(@RequestBody Usuarios usuarios, BindingResult bindingResult, HttpServletRequest request, HttpServletResponse response) {
 		 
-	        Usuarios usuario = userRepository.findUser(usuarios);
-	        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-	        if (encoder.matches(usuarios.getStrpassword(), usuario.getStrpassword())) {
+		 //buscamos al usuario en BBDD
+	     Usuarios usuario = userRepository.findUser(usuarios);
+	     BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+	        
+	     //Verificamos que la contraseña enviada coincida con la guardada en BBDD
+	     if (encoder.matches(usuarios.getStrpassword(), usuario.getStrpassword())) {
 		        
-		        String token = jwtService.toToken(usuario);
+	    	//obtenemos los roles del usuario
+	        usuario.setRoles(rolRepository.findRolByUsuario(usuario));
+	        	
+	        //generamos el token
+		    String token = jwtService.toToken(usuario);
 		        
-		        return ResponseEntity.ok(new JwtAuthenticationResponse(token));
+		    //hacemos un logout previo si procede
+		    if (!jwtService.logout(usuario, request, response)) {
+		        	
+		    	// si no hemos hecho logout guardamos en sesión.
+		        //guardamos el usuario en sesión
+			    jwtService.guardarUsuarioSesion(usuario, request);
+		    }
+		        
+		    return ResponseEntity.ok(new JWTUsuario(usuario, token));
+		    
 	        }else {
 	        	return (ResponseEntity<?>) ResponseEntity.ok();
 	        }
 	    }
 	
-	@GetMapping("/insert")
-	public List<Usuarios> insert(){
+	@PreAuthorize("hasRole('ADMIN')")
+	@RequestMapping(path = "/insert", method = POST)
+	public ResponseEntity<?> insert(@RequestBody Usuarios usuarios) {
 		
-		Usuarios usuario = new Usuarios();
-		usuario.setStrnombre("Juan");
-		usuario.setStrapellido1("Juan Password");
-		userRepository.insert(usuario);
+		//buscamos al usuario en BBDD
+		Usuarios usuario = userRepository.findUser(usuarios);
+	    
+		if (usuario== null) {
+			//no se ha encontrado el usuario, se puede insertar
+			userRepository.insert(usuario);
+		}
 		
-		return userRepository.findAllData();
+		return (ResponseEntity<?>) ResponseEntity.ok();
 	}
 	
-	@GetMapping("/delete")
-	public List<Usuarios> delete(){
-		Usuarios usuario = new Usuarios();
-		usuario.setStrnombre("Juan");
-		userRepository.delete(usuario);
+	@PreAuthorize("hasRole('ADMIN')")
+	@RequestMapping(path = "/delete", method = POST)
+	public ResponseEntity<?> delete(@RequestBody Usuarios usuarios) {
 		
-		return userRepository.findAllData();
+		//buscamos al usuario en BBDD
+		Usuarios usuario = userRepository.findUser(usuarios);
+		
+		if (usuario !=null) {
+			userRepository.delete(usuario);	
+		}
+		
+		
+		return (ResponseEntity<?>) ResponseEntity.ok();
 	}
+	
+
+	 @RequestMapping(path = "/refrescarToken", method = GET)
+	 public ResponseEntity<?> refrescaYautentica(HttpServletRequest request) {
+		 
+		 //cogemos el token de la cabecera
+		 String token = request.getHeader(header);
+		 String nuevoToken = null;
+		 
+		 //sacamos el id que está en el token
+		 Integer idUsuario = jwtService.getIdUsuarioFromToken(token);
+		 
+		 //se busca al usuario en BBDD
+		 Usuarios usuario = userRepository.findById(idUsuario.intValue());
+		 
+		 //se comprueba que el token esté caducado
+		  if (jwtService.sePuedeRefrescar(token))
+			  nuevoToken = jwtService.toToken(usuario);
+		  
+		  //se devuelve nuevo token
+		  return ResponseEntity.ok(new JwtAuthenticationResponse(nuevoToken));
+		 
+	 }
 }

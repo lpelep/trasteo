@@ -37,11 +37,10 @@ public class UserRepositoryImpl implements UserRepository {
 
 
 	@Override
-	public List<Usuarios> delete(Usuarios user) {
+	public void delete(Usuarios user) {
 		Usuarios usuario = new Usuarios();
 		usuario.setStrnombre("Juan");
 		userMapper.delete(usuario);
-		return userMapper.findAll();
 	}
 
 

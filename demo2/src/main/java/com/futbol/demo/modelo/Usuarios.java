@@ -1,8 +1,11 @@
 package com.futbol.demo.modelo;
 
+import java.util.List;
+
 import lombok.Data;
 
-public @Data class Usuarios {
+@Data
+public class Usuarios {
 
 	private Integer idusuario;
 	private String strnombre;
@@ -11,4 +14,6 @@ public @Data class Usuarios {
 	private String strlogin;
 	private String strpassword;
 	private String email;
+	private List<Rol> roles;
+	
 }

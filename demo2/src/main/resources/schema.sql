@@ -13,7 +13,7 @@ create table usuarios(
 );
 
 create table roles(
-	idusuario serial, 
+	idrol serial, 
 	strrol varchar(255)
 );
 
