@@ -27,26 +27,19 @@ public class UserRepositoryImpl implements UserRepository {
 
 	@Override
 	public List<Usuarios> insert(Usuarios user) {
-		
-		Usuarios usuario = new Usuarios();
-		usuario.setStrnombre("Juan");
-		usuario.setStrapellido1("De la Cierva");
-		userMapper.insert(usuario);
+		userMapper.insert(user);
 		return userMapper.findAll();
 	}
 
 
 	@Override
 	public void delete(Usuarios user) {
-		Usuarios usuario = new Usuarios();
-		usuario.setStrnombre("Juan");
-		userMapper.delete(usuario);
+		userMapper.delete(user);
 	}
 
 
 	@Override
 	public Usuarios findUser(Usuarios user) {
-		//Usuarios localizado = userMapper.findUser(user.getStrlogin(), user.getStrpassword());
 		Usuarios localizado = userMapper.findUser(user);
 		return localizado;
 		

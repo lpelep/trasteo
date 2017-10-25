@@ -2,24 +2,51 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.futbol.demo.mapper.UsuariosMapper">
 
-    <select id="findAll" resultType="Usuarios">
-		select * from usuarios;
+	<!--- ESTE RESULTMAP ES REUTILIZABLE PARA OBTENER UN OBJETO USUARIO -->
+	<resultMap id="UsuarioResultCompleto" type="Usuarios">
+  		<id property="idusuario" column="idusuario" />
+  		<result property="strnombre" column="strnombre"/>
+  		<result property="strapellido1" column="strapellido1"/>
+  		<result property="strapellido2" column="strapellido2"/>
+  		<result property="strlogin" column="strlogin"/>
+  		<result property="strpassword" column="strpassword"/>
+  		<result property="email" column="email"/>
+  		<collection property="roles" javaType="ArrayList" ofType="Rol" resultMap="RolResult"/>
+	</resultMap>
+
+	
+	<!--- ESTE RESULTMAP ES REUTILIZABLE PARA OBTENER UN OBJETO ROL -->
+	<resultMap id="RolResult" type="Rol">
+  		<id property="idRol" column="idRol"/>
+  		<result property="strRol" column="strRol"/>
+	</resultMap>
+
+	<sql id="usuarioyrol">
+		SELECT  u.idusuario, u.strnombre, u.strapellido1, u.strapellido2, u.strlogin, u.strpassword, u.email, r.idrol, r.strRol 
+		
+		FROM USUARIOS u LEFT JOIN ROLES_USUARIOS RU ON u.idusuario = RU.idusu LEFT JOIN ROLES R ON RU.IDROLUSU = R.IDROL
+	</sql>
+
+    <select id="findAll" resultMap="UsuarioResultCompleto">
+		<include refid="usuarioyrol"/>
     </select>
 	
 	<insert id="insert" parameterType="Usuarios" useGeneratedKeys="true"> 
-  		insert into usuarios (strnombre, strapellido1) values (#{strnombre}, #{strapellido1})
+  		insert into usuarios (strlogin, strpassword) values (#{strlogin}, #{strpassword})
 	</insert>
 	
 	<delete id="delete" parameterType="Usuarios">
 		
-  		delete from usuarios where firstName = #{strnombre}
+  		delete from usuarios where strlogin = #{strlogin}
 	</delete>
 	
-	<select id="findUser" resultType="Usuarios">
-		select * from usuarios where strlogin = #{strlogin}
+	<select id="findUser" resultMap="UsuarioResultCompleto">
+		<include refid="usuarioyrol"/>
+		where u.strlogin = #{strlogin}
     </select>
 	
-	<select id="findById" resultType="Usuarios">
-		select * from usuarios where idusuario = #{id}
+	<select id="findById" resultMap="UsuarioResultCompleto">
+		<include refid="usuarioyrol"/>
+		where u.idusuario = #{id}
     </select>
 </mapper>

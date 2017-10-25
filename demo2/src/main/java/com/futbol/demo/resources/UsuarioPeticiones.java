@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.futbol.demo.core.rol.RolRepository;
 import com.futbol.demo.core.user.UserRepository;
 import com.futbol.demo.modelo.JWTUsuario;
 import com.futbol.demo.modelo.Usuarios;
@@ -33,17 +32,13 @@ public class UsuarioPeticiones {
 	private UserRepository userRepository;
 	
 	@Autowired
-	private RolRepository rolRepository;
-	
-	@Autowired
 	private JwtService jwtService;
 	
 	@Value("${jwt.header}")
 	private String header;
 	
-	public UsuarioPeticiones(UserRepository userRepository, RolRepository rolRepository) {
+	public UsuarioPeticiones(UserRepository userRepository) {
 		this.userRepository = userRepository;
-		this.rolRepository = rolRepository;
 	}
 	
 	@RequestMapping(path = "/all", method = GET)
@@ -60,9 +55,6 @@ public class UsuarioPeticiones {
 	        
 	     //Verificamos que la contraseña enviada coincida con la guardada en BBDD
 	     if (encoder.matches(usuarios.getStrpassword(), usuario.getStrpassword())) {
-		        
-	    	//obtenemos los roles del usuario
-	        usuario.setRoles(rolRepository.findRolByUsuario(usuario));
 	        	
 	        //generamos el token
 		    String token = jwtService.toToken(usuario);
@@ -84,22 +76,23 @@ public class UsuarioPeticiones {
 	
 	@PreAuthorize("hasRole('ADMIN')")
 	@RequestMapping(path = "/insert", method = POST)
-	public ResponseEntity<?> insert(@RequestBody Usuarios usuarios) {
+	public List<Usuarios> insert(@RequestBody Usuarios usuarios) {
 		
 		//buscamos al usuario en BBDD
 		Usuarios usuario = userRepository.findUser(usuarios);
 	    
 		if (usuario== null) {
 			//no se ha encontrado el usuario, se puede insertar
-			userRepository.insert(usuario);
+			BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+			usuarios.setStrpassword(encoder.encode(usuarios.getStrpassword()));
+			
 		}
-		
-		return (ResponseEntity<?>) ResponseEntity.ok();
+		return userRepository.insert(usuarios);
 	}
 	
 	@PreAuthorize("hasRole('ADMIN')")
 	@RequestMapping(path = "/delete", method = POST)
-	public ResponseEntity<?> delete(@RequestBody Usuarios usuarios) {
+	public List<Usuarios> delete(@RequestBody Usuarios usuarios) {
 		
 		//buscamos al usuario en BBDD
 		Usuarios usuario = userRepository.findUser(usuarios);
@@ -109,7 +102,7 @@ public class UsuarioPeticiones {
 		}
 		
 		
-		return (ResponseEntity<?>) ResponseEntity.ok();
+		return userRepository.findAllData();
 	}
 	
 

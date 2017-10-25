@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import com.futbol.demo.core.rol.RolRepository;
 import com.futbol.demo.core.user.UserRepository;
 import com.futbol.demo.modelo.Usuarios;
 import com.futbol.demo.service.JwtService;
@@ -21,9 +20,6 @@ public class JwttokenFilter extends OncePerRequestFilter {
 	
 	@Autowired
 	private UserRepository userRepository;
-	
-	@Autowired
-	private RolRepository rolRepository;
 	
 	@Autowired
     private JwtService jwtService;
@@ -43,18 +39,9 @@ public class JwttokenFilter extends OncePerRequestFilter {
                 if (SecurityContextHolder.getContext().getAuthentication() == null) {
                 	
                 	Usuarios usuario = userRepository.findById(Integer.parseInt(id));
-                	if (usuario != null) {
-                		
-                		usuario.setRoles(rolRepository.findRolByUsuario(usuario));
-                		
+                	
+                	if (usuario != null)
                 		jwtService.guardarUsuarioSesion(usuario, request);
-                		
-//                		UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(usuario, null, Collections.emptyList());
-//                		
-//                		authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-//                        SecurityContextHolder.getContext().setAuthentication(authenticationToken);
-                        
-                	}
                 }
             });
         }
