@@ -72,7 +72,12 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-actuator-docs</artifactId>
 		</dependency>
-	</dependencies>
+		<dependency>
+    		<groupId>io.fabric8</groupId>
+    		<artifactId>fabric8-maven-plugin</artifactId>
+    		<version>3.5.39</version>
+		</dependency>
+		</dependencies>
 
 	<build>
 		<plugins>
